@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>নীড়</title>
+<style>
+
+body{font-family:sans-serif;font-size:20px;background:linear-gradient(180deg,#a9ddb8,#ceb47a);color:#1f2a1c;margin:0;padding:16px;min-height:100vh}
+.wrap{max-width:800px;margin:0 auto}
+h1{font-size:2.6rem;color:#fff;background:linear-gradient(90deg,#2f6f3e,#f59e0b);padding:16px 22px;border-radius:14px;margin-bottom:8px}
+p{font-size:1.3rem}
+.card{background:#b4a07f;border:1px solid #7c8f6c;border-left:6px solid #2f6f3e;border-radius:12px;padding:18px;margin-top:14px;box-shadow:0 2px 6px rgba(0,0,0,.07)}
+.card h2{font-size:2rem;margin:0 0 6px;color:#1b5e2f}
+.small{color:#b45309;font-size:1.2rem;font-weight:bold}
+button{background:#2f6f3e;color:#fff;border:0;border-radius:10px;padding:14px 22px;font-size:1.25rem;cursor:pointer;margin-top:10px}
+button:hover{background:#245a31}
+button.ghost{background:#fde7b0;color:#7a4a00;margin-left:6px}
+button.ghost:hover{background:#fbd77a}
+.thana{background:#f3faf4;border-top:1px solid #d9e0d3;margin-top:12px;padding:12px;border-radius:8px;font-size:1.25rem}
+input{width:100%;box-sizing:border-box;padding:16px;font-size:1.5rem;border:2px solid #2f6f3e;border-radius:10px;background:#fff}
+.sugg{background:#fff;border:1px solid #d9e0d3;border-radius:10px;margin-top:8px;overflow:hidden}
+.item{padding:16px 18px;font-size:1.5rem;cursor:pointer;border-bottom:1px solid #eef2ea}
+.item:last-child{border-bottom:0}
+.item:hover{background:#e6f4ea}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1 id="title"></h1>
+  <p id="tagline"></p>
+  <div>
+    <button class="ghost" style="margin-left:0" onclick="setLang('bn')">বাংলা</button>
+    <button class="ghost" onclick="setLang('en')">English</button>
+    <button class="ghost" onclick="setLang('both')">দুটোই</button>
+  </div>
+  <input id="search" style="margin-top:12px" autocomplete="off">
+  <div id="list"></div>
+</div>
+
+<script>
+    function getUserId() {
+  try {
+    var id = localStorage.getItem("neerUserId");
+    if (!id) {
+      id = (window.crypto && crypto.randomUUID)
+        ? crypto.randomUUID()
+        : "u" + Date.now() + Math.random().toString(36).slice(2);
+      localStorage.setItem("neerUserId", id);
+    }
+    return id;
+  } catch (e) {
+    return "u" + Date.now() + Math.random().toString(36).slice(2);
+  }
+}
+var userId = getUserId();
+var bnText =
+"ঢাকা,গাজীপুর,নারায়ণগঞ্জ,নরসিংদী,মানিকগঞ্জ,মুন্সীগঞ্জ,কিশোরগঞ্জ,টাঙ্গাইল,ফরিদপুর,গোপালগঞ্জ,মাদারীপুর,রাজবাড়ী,শরীয়তপুর," +
+"চট্টগ্রাম,কক্সবাজার,কুমিল্লা,ফেনী,ব্রাহ্মণবাড়িয়া,রাঙ্গামাটি,নোয়াখালী,চাঁদপুর,লক্ষ্মীপুর,খাগড়াছড়ি,বান্দরবান," +
+"রাজশাহী,বগুড়া,জয়পুরহাট,নওগাঁ,নাটোর,চাঁপাইনবাবগঞ্জ,পাবনা,সিরাজগঞ্জ," +
+"খুলনা,বাগেরহাট,সাতক্ষীরা,যশোর,নড়াইল,মাগুরা,ঝিনাইদহ,কুষ্টিয়া,চুয়াডাঙ্গা,মেহেরপুর," +
+"বরিশাল,ভোলা,ঝালকাঠি,পটুয়াখালী,পিরোজপুর,বরগুনা," +
+"সিলেট,মৌলভীবাজার,হবিগঞ্জ,সুনামগঞ্জ," +
+"রংপুর,দিনাজপুর,কুড়িগ্রাম,গাইবান্ধা,লালমনিরহাট,নীলফামারী,পঞ্চগড়,ঠাকুরগাঁও," +
+"ময়মনসিংহ,জামালপুর,নেত্রকোণা,শেরপুর";
+var enText =
+"Dhaka,Gazipur,Narayanganj,Narsingdi,Manikganj,Munshiganj,Kishoreganj,Tangail,Faridpur,Gopalganj,Madaripur,Rajbari,Shariatpur," +
+"Chattogram,Cox's Bazar,Cumilla,Feni,Brahmanbaria,Rangamati,Noakhali,Chandpur,Lakshmipur,Khagrachhari,Bandarban," +
+"Rajshahi,Bogura,Joypurhat,Naogaon,Natore,Chapainawabganj,Pabna,Sirajganj," +
+"Khulna,Bagerhat,Satkhira,Jashore,Narail,Magura,Jhenaidah,Kushtia,Chuadanga,Meherpur," +
+"Barishal,Bhola,Jhalokati,Patuakhali,Pirojpur,Barguna," +
+"Sylhet,Moulvibazar,Habiganj,Sunamganj," +
+"Rangpur,Dinajpur,Kurigram,Gaibandha,Lalmonirhat,Nilphamari,Panchagarh,Thakurgaon," +
+"Mymensingh,Jamalpur,Netrokona,Sherpur";
+
+var bnNames = bnText.split(",");
+var enNames = enText.split(",");
+
+var thanas = {
+  "ঢাকা": ["মিরপুর","ধানমন্ডি","উত্তরা","মোহাম্মদপুর","গুলশান"],
+  "গাজীপুর": ["গাজীপুর সদর","কালিয়াকৈর","কালীগঞ্জ","কাপাসিয়া","শ্রীপুর"],
+  "নারায়ণগঞ্জ": ["নারায়ণগঞ্জ সদর","আড়াইহাজার","বন্দর","রূপগঞ্জ","সোনারগাঁও"],
+  "নরসিংদী": ["নরসিংদী সদর","বেলাবো","মনোহরদী","পলাশ","রায়পুরা","শিবপুর"],
+  "মানিকগঞ্জ": ["মানিকগঞ্জ সদর","ঘিওর","দৌলতপুর","শিবালয়","সাটুরিয়া","সিংগাইর","হরিরামপুর"],
+  "মুন্সীগঞ্জ": ["মুন্সীগঞ্জ সদর","গজারিয়া","লৌহজং","শ্রীনগর","সিরাজদিখান","টঙ্গীবাড়ী"],
+  "কিশোরগঞ্জ": ["কিশোরগঞ্জ সদর","অষ্টগ্রাম","বাজিতপুর","ভৈরব","হোসেনপুর","ইটনা","করিমগঞ্জ","কটিয়াদী","কুলিয়ারচর","মিঠামইন","নিকলী","পাকুন্দিয়া","তাড়াইল"],
+  "টাঙ্গাইল": ["টাঙ্গাইল সদর","বাসাইল","ভুয়াপুর","দেলদুয়ার","ধনবাড়ী","ঘাটাইল","গোপালপুর","কালিহাতী","মধুপুর","মির্জাপুর","নাগরপুর","সখীপুর"],
+  "ফরিদপুর": ["ফরিদপুর সদর","আলফাডাঙ্গা","ভাঙ্গা","বোয়ালমারী","চরভদ্রাসন","মধুখালী","নগরকান্দা","সদরপুর","সালথা"],
+  "গোপালগঞ্জ": ["গোপালগঞ্জ সদর","কাশিয়ানী","কোটালীপাড়া","মুকসুদপুর","টুঙ্গিপাড়া"],
+  "মাদারীপুর": ["মাদারীপুর সদর","কালকিনি","রাজৈর","শিবচর","ডাসার"],
+  "রাজবাড়ী": ["রাজবাড়ী সদর","বালিয়াকান্দি","গোয়ালন্দ","কালুখালী","পাংশা"],
+  "শরীয়তপুর": ["শরীয়তপুর সদর","ভেদরগঞ্জ","ডামুড্যা","গোসাইরহাট","নড়িয়া","জাজিরা"],
+
+  "চট্টগ্রাম": ["কোতোয়ালী","পাঁচলাইশ","খুলশী","বন্দর","বায়েজিদ বোস্তামী"],
+  "কক্সবাজার": ["কক্সবাজার সদর","চকরিয়া","কুতুবদিয়া","মহেশখালী","রামু","টেকনাফ","উখিয়া","পেকুয়া"],
+  "কুমিল্লা": ["কুমিল্লা সদর","কুমিল্লা সদর দক্ষিণ","বরুড়া","ব্রাহ্মণপাড়া","বুড়িচং","চান্দিনা","চৌদ্দগ্রাম","দাউদকান্দি","দেবিদ্বার","হোমনা","লাকসাম","লালমাই","মনোহরগঞ্জ","মুরাদনগর","নাঙ্গলকোট","তিতাস","মেঘনা"],
+  "ফেনী": ["ফেনী সদর","ছাগলনাইয়া","দাগনভূঞা","ফুলগাজী","পরশুরাম","সোনাগাজী"],
+  "ব্রাহ্মণবাড়িয়া": ["ব্রাহ্মণবাড়িয়া সদর","আখাউড়া","আশুগঞ্জ","বাঞ্ছারামপুর","বিজয়নগর","কসবা","নবীনগর","নাসিরনগর","সরাইল"],
+  "রাঙ্গামাটি": ["রাঙ্গামাটি সদর","বাঘাইছড়ি","বরকল","জুরাছড়ি","কাউখালী","কাপ্তাই","লংগদু","নানিয়ারচর","রাজস্থলী","বিলাইছড়ি"],
+  "নোয়াখালী": ["নোয়াখালী সদর","বেগমগঞ্জ","চাটখিল","কোম্পানীগঞ্জ","হাতিয়া","কবিরহাট","সেনবাগ","সোনাইমুড়ী","সুবর্ণচর"],
+  "চাঁদপুর": ["চাঁদপুর সদর","ফরিদগঞ্জ","হাইমচর","হাজীগঞ্জ","কচুয়া","মতলব উত্তর","মতলব দক্ষিণ","শাহরাস্তি"],
+  "লক্ষ্মীপুর": ["লক্ষ্মীপুর সদর","কমলনগর","রায়পুর","রামগঞ্জ","রামগতি"],
+  "খাগড়াছড়ি": ["খাগড়াছড়ি সদর","দীঘিনালা","লক্ষ্মীছড়ি","মহালছড়ি","মানিকছড়ি","মাটিরাঙ্গা","পানছড়ি","রামগড়","গুইমারা"],
+  "বান্দরবান": ["বান্দরবান সদর","আলীকদম","লামা","নাইক্ষ্যংছড়ি","রোয়াংছড়ি","রুমা","থানচি"],
+
+  "রাজশাহী": ["বোয়ালিয়া","রাজপাড়া","মতিহার","শাহ মখদুম","বাগমারা","বাঘা","চারঘাট","দুর্গাপুর","গোদাগাড়ী","মোহনপুর","পবা","পুঠিয়া","তানোর"],
+  "বগুড়া": ["বগুড়া সদর","আদমদীঘি","ধুনট","দুপচাঁচিয়া","গাবতলী","কাহালু","নন্দীগ্রাম","শাজাহানপুর","শেরপুর","শিবগঞ্জ","সোনাতলা"],
+  "জয়পুরহাট": ["জয়পুরহাট সদর","আক্কেলপুর","কালাই","ক্ষেতলাল","পাঁচবিবি"],
+  "নওগাঁ": ["নওগাঁ সদর","আত্রাই","বদলগাছী","ধামইরহাট","মহাদেবপুর","মান্দা","নিয়ামতপুর","পত্নীতলা","পোরশা","রাণীনগর","সাপাহার"],
+  "নাটোর": ["নাটোর সদর","বাগাতিপাড়া","বড়াইগ্রাম","গুরুদাসপুর","লালপুর","সিংড়া","নলডাঙ্গা"],
+  "চাঁপাইনবাবগঞ্জ": ["চাঁপাইনবাবগঞ্জ সদর","ভোলাহাট","গোমস্তাপুর","নাচোল","শিবগঞ্জ"],
+  "পাবনা": ["পাবনা সদর","আটঘরিয়া","বেড়া","ভাঙ্গুড়া","চাটমোহর","ফরিদপুর","ঈশ্বরদী","সাঁথিয়া","সুজানগর"],
+  "সিরাজগঞ্জ": ["সিরাজগঞ্জ সদর","বেলকুচি","চৌহালি","কামারখন্দ","কাজীপুর","রায়গঞ্জ","শাহজাদপুর","তাড়াশ","উল্লাপাড়া"],
+
+  "খুলনা": ["খুলনা সদর","সোনাডাঙ্গা","খালিশপুর","দৌলতপুর","বটিয়াঘাটা","ডুমুরিয়া","দাকোপ","দিঘলিয়া","ফুলতলা","কয়রা","পাইকগাছা","রূপসা","তেরখাদা"],
+  "বাগেরহাট": ["বাগেরহাট সদর","চিতলমারী","ফকিরহাট","কচুয়া","মোল্লাহাট","মোংলা","মোড়েলগঞ্জ","রামপাল","শরণখোলা"],
+  "সাতক্ষীরা": ["সাতক্ষীরা সদর","আশাশুনি","দেবহাটা","কলারোয়া","কালিগঞ্জ","শ্যামনগর","তালা"],
+  "যশোর": ["যশোর সদর","অভয়নগর","বাঘারপাড়া","চৌগাছা","ঝিকরগাছা","কেশবপুর","মণিরামপুর","শার্শা"],
+  "নড়াইল": ["নড়াইল সদর","কালিয়া","লোহাগড়া","নড়াগাতী"],
+  "মাগুরা": ["মাগুরা সদর","মোহাম্মদপুর","শালিখা","শ্রীপুর"],
+  "ঝিনাইদহ": ["ঝিনাইদহ সদর","হরিণাকুন্ডু","কালীগঞ্জ","কোটচাঁদপুর","মহেশপুর","শৈলকুপা"],
+  "কুষ্টিয়া": ["কুষ্টিয়া সদর","ভেড়ামারা","দৌলতপুর","খোকসা","কুমারখালী","মিরপুর"],
+  "চুয়াডাঙ্গা": ["চুয়াডাঙ্গা সদর","আলমডাঙ্গা","দামুড়হুদা","জীবননগর"],
+  "মেহেরপুর": ["মেহেরপুর সদর","গাংনী","মুজিবনগর"],
+
+  "বরিশাল": ["বরিশাল সদর","আগৈলঝাড়া","বাবুগঞ্জ","বাকেরগঞ্জ","বানারীপাড়া","গৌরনদী","হিজলা","মেহেন্দিগঞ্জ","মুলাদী","উজিরপুর"],
+  "ভোলা": ["ভোলা সদর","বোরহানউদ্দিন","চরফ্যাশন","দৌলতখান","লালমোহন","মনপুরা","তজুমদ্দিন"],
+  "ঝালকাঠি": ["ঝালকাঠি সদর","কাঁঠালিয়া","নলছিটি","রাজাপুর"],
+  "পটুয়াখালী": ["পটুয়াখালী সদর","বাউফল","দশমিনা","দুমকি","গলাচিপা","কলাপাড়া","মির্জাগঞ্জ","রাঙ্গাবালী"],
+  "পিরোজপুর": ["পিরোজপুর সদর","ভান্ডারিয়া","কাউখালী","মঠবাড়িয়া","নাজিরপুর","নেছারাবাদ","জিয়ানগর"],
+  "বরগুনা": ["বরগুনা সদর","আমতলী","বামনা","বেতাগী","পাথরঘাটা","তালতলী"],
+
+  "সিলেট": ["সিলেট সদর","বালাগঞ্জ","বিয়ানীবাজার","বিশ্বনাথ","কোম্পানীগঞ্জ","দক্ষিণ সুরমা","ফেঞ্চুগঞ্জ","গোলাপগঞ্জ","গোয়াইনঘাট","জৈন্তাপুর","কানাইঘাট","জকিগঞ্জ","ওসমানীনগর"],
+  "মৌলভীবাজার": ["মৌলভীবাজার সদর","বড়লেখা","জুড়ী","কমলগঞ্জ","কুলাউড়া","রাজনগর","শ্রীমঙ্গল"],
+  "হবিগঞ্জ": ["হবিগঞ্জ সদর","আজমিরীগঞ্জ","বাহুবল","বানিয়াচং","চুনারুঘাট","লাখাই","মাধবপুর","নবীগঞ্জ","শায়েস্তাগঞ্জ"],
+  "সুনামগঞ্জ": ["সুনামগঞ্জ সদর","বিশ্বম্ভরপুর","ছাতক","ধর্মপাশা","দোয়ারাবাজার","জগন্নাথপুর","জামালগঞ্জ","দিরাই","শাল্লা","তাহিরপুর","মধ্যনগর","দক্ষিণ সুনামগঞ্জ"],
+
+  "রংপুর": ["রংপুর সদর","বদরগঞ্জ","গঙ্গাচড়া","কাউনিয়া","মিঠাপুকুর","পীরগাছা","পীরগঞ্জ","তারাগঞ্জ"],
+  "দিনাজপুর": ["দিনাজপুর সদর","বিরামপুর","বীরগঞ্জ","বিরল","বোচাগঞ্জ","চিরিরবন্দর","ফুলবাড়ী","ঘোড়াঘাট","হাকিমপুর","কাহারোল","খানসামা","নবাবগঞ্জ","পার্বতীপুর"],
+  "কুড়িগ্রাম": ["কুড়িগ্রাম সদর","ভুরুঙ্গামারী","চিলমারী","ফুলবাড়ী","নাগেশ্বরী","রাজারহাট","রাজীবপুর","রৌমারী","উলিপুর"],
+  "গাইবান্ধা": ["গাইবান্ধা সদর","ফুলছড়ি","গোবিন্দগঞ্জ","পলাশবাড়ী","সাদুল্লাপুর","সাঘাটা","সুন্দরগঞ্জ"],
+  "লালমনিরহাট": ["লালমনিরহাট সদর","আদিতমারী","হাতীবান্ধা","কালীগঞ্জ","পাটগ্রাম"],
+  "নীলফামারী": ["নীলফামারী সদর","ডিমলা","ডোমার","জলঢাকা","কিশোরগঞ্জ","সৈয়দপুর"],
+  "পঞ্চগড়": ["পঞ্চগড় সদর","আটোয়ারী","বোদা","দেবীগঞ্জ","তেঁতুলিয়া"],
+  "ঠাকুরগাঁও": ["ঠাকুরগাঁও সদর","বালিয়াডাঙ্গী","হরিপুর","পীরগঞ্জ","রাণীশংকৈল"],
+
+  "ময়মনসিংহ": ["ময়মনসিংহ সদর","ভালুকা","ধোবাউড়া","ফুলবাড়িয়া","গফরগাঁও","গৌরীপুর","হালুয়াঘাট","ঈশ্বরগঞ্জ","মুক্তাগাছা","নান্দাইল","ফুলপুর","তারাকান্দা","ত্রিশাল"],
+  "জামালপুর": ["জামালপুর সদর","বকশীগঞ্জ","দেওয়ানগঞ্জ","ইসলামপুর","মাদারগঞ্জ","মেলান্দহ","সরিষাবাড়ী"],
+  "নেত্রকোণা": ["নেত্রকোণা সদর","আটপাড়া","বারহাট্টা","দুর্গাপুর","কলমাকান্দা","কেন্দুয়া","খালিয়াজুরী","মদন","মোহনগঞ্জ","পূর্বধলা"],
+  "শেরপুর": ["শেরপুর সদর","ঝিনাইগাতী","নকলা","নালিতাবাড়ী","শ্রীবরদী"]
+};
+
+function addMissingThanas(district, names) {
+  if (!thanas[district]) {
+    thanas[district] = [];
+  }
+
+  const existing = new Set(thanas[district]);
+
+  thanas[district].push(
+    ...names.filter(name => !existing.has(name))
+  );
+}
+
+// ঢাকা মহানগরীর বাদ পড়া পুলিশ থানা
+addMissingThanas("ঢাকা", [
+  "আদাবর",
+  "বাড্ডা",
+  "বনানী",
+  "বংশাল",
+  "ভাসানটেক",
+  "ক্যান্টনমেন্ট",
+  "চকবাজার",
+  "দক্ষিণখান",
+  "দারুস সালাম",
+  "ডেমরা",
+  "গেন্ডারিয়া",
+  "হাজারীবাগ",
+  "যাত্রাবাড়ী",
+  "কদমতলী",
+  "কাফরুল",
+  "কলাবাগান",
+  "কামরাঙ্গীরচর",
+  "খিলগাঁও",
+  "খিলক্ষেত",
+  "লালবাগ",
+  "মতিঝিল",
+  "মুগদা",
+  "নিউ মার্কেট",
+  "পল্লবী",
+  "পল্টন",
+  "রামনা",
+  "রামপুরা",
+  "রূপনগর",
+  "সবুজবাগ",
+  "শাহ আলী",
+  "শাহবাগ",
+  "শাহজাহানপুর",
+  "শেরেবাংলা নগর",
+  "শ্যামপুর",
+  "সূত্রাপুর",
+  "তেজগাঁও",
+  "তেজগাঁও শিল্পাঞ্চল",
+  "তুরাগ",
+  "উত্তরখান",
+  "উত্তরা পশ্চিম",
+  "ওয়ারী",
+  "বিমানবন্দর",
+  "দক্ষিণখান",
+  "মিরপুর মডেল",
+  "উত্তরা মডেল",
+  "কোতোয়ালী",
+  "গুলশান",
+  "ধানমন্ডি",
+  "মোহাম্মদপুর",
+  "পূর্ব উত্তরা"
+]);
+
+// ঢাকা জেলার উপজেলা
+addMissingThanas("ঢাকা", [
+  "ধামরাই",
+  "দোহার",
+  "কেরানীগঞ্জ",
+  "নবাবগঞ্জ",
+  "সাভার"
+]);
+
+// চট্টগ্রাম জেলার বাদ পড়া উপজেলা
+addMissingThanas("চট্টগ্রাম", [
+  "আনোয়ারা",
+  "বাঁশখালী",
+  "বোয়ালখালী",
+  "চন্দনাইশ",
+  "ফটিকছড়ি",
+  "হাটহাজারী",
+  "লোহাগাড়া",
+  "মিরসরাই",
+  "পটিয়া",
+  "রাঙ্গুনিয়া",
+  "রাউজান",
+  "সন্দ্বীপ",
+  "সাতকানিয়া",
+  "সীতাকুণ্ড",
+  "কর্ণফুলী"
+  
+]);
+
+// চট্টগ্রাম মহানগরীর বাদ পড়া পুলিশ থানা
+addMissingThanas("চট্টগ্রাম", [
+  "বাকলিয়া",
+  "চান্দগাঁও",
+  "সদরঘাট",
+
+  "ডবলমুরিং",
+  "পাহাড়তলী",
+  "হালিশহর",
+  "আকবরশাহ",
+  "পতেঙ্গা",
+  "ইপিজেড"
+]);
+
+// কক্সবাজার
+addMissingThanas("কক্সবাজার", [
+  "ঈদগাঁও"
+]);
+
+// বগুড়া
+addMissingThanas("বগুড়া", [
+  "সারিয়াকান্দি"
+]);
+
+// ঠাকুরগাঁও
+addMissingThanas("ঠাকুরগাঁও", [
+  "ভুল্লী",
+  "রুহিয়া"
+]);
+
+// কুড়িগ্রাম
+addMissingThanas("কুড়িগ্রাম", [
+  "চর রাজিবপুর"
+]);
+
+// সুনামগঞ্জ
+addMissingThanas("সুনামগঞ্জ", [
+  "শান্তিগঞ্জ"
+]);
+var bnMap = {
+  "ক":"k","খ":"kh","গ":"g","ঘ":"gh","ঙ":"ng","চ":"ch","ছ":"ch","জ":"j","ঝ":"jh","ঞ":"n",
+  "ট":"t","ঠ":"th","ড":"d","ঢ":"dh","ণ":"n","ত":"t","থ":"th","দ":"d","ধ":"dh","ন":"n",
+  "প":"p","ফ":"f","ব":"b","ভ":"bh","ম":"m","য":"y","র":"r","ল":"l","শ":"sh","ষ":"sh",
+  "স":"s","হ":"h","ড়":"r","ঢ়":"rh","য়":"y","ৎ":"t","ং":"ng","ঃ":"h"
+};
+
+function collapse(s) {
+  return s.replace(/(.)\1+/g, "$1");
+}
+
+// বাংলা নাম -> ব্যঞ্জনের ছাঁচ (যেমন "ধানমন্ডি" -> "dhnmnd")
+function bnSkel(s) {
+  s = s.normalize("NFC").replace(/ড়/g, "ড়").replace(/ঢ়/g, "ঢ়").replace(/য়/g, "য়");
+  var out = "";
+  for (var i = 0; i < s.length; i++) {
+    if (bnMap[s[i]]) out += bnMap[s[i]];
+  }
+  return collapse(out);
+}
+
+// ইংরেজি লেখা -> একই ধরনের ছাঁচ (যেমন "dhanmondi" -> "dhnmnd")
+function enSkel(s) {
+  s = s.toLowerCase()
+    .replace(/ph/g, "f").replace(/z/g, "j").replace(/v/g, "b")
+    .replace(/w/g, "b").replace(/q/g, "k").replace(/c(?!h)/g, "k")
+    .replace(/[^a-z]/g, "")
+    .replace(/[aeiou]/g, "");
+  return collapse(s);
+}
+
+var areas = [];
+for (var k = 0; k < bnNames.length; k++) {
+  var tn = thanas[bnNames[k]] || [];
+  var tl = [];
+  for (var t = 0; t < tn.length; t++) tl.push({ name: tn[t], skel: bnSkel(tn[t]), rating: 0, count: 0 });
+  areas.push({ name: bnNames[k], en: enNames[k], rating: 0, count: 0, thanas: tl, open: false });
+}
+
+var selected = -1;
+var lang = "bn";
+var listBox = document.getElementById("list");
+var searchBox = document.getElementById("search");
+
+var T = {
+  bn: { title: "নীড়", tagline: "বাসা নেওয়ার আগে জেনে নিন জেলাটা কেমন।",search: "জেলা বা থানার নাম লিখুন...",
+none: "কোনো জেলা বা থানা পাওয়া যায়নি।", close: "← অন্য জেলা খুঁজুন" },
+  en: { title: "Neer", tagline: "Know the district before you rent a home.", search: "Search district or thana...",
+none: "No district or thana found.", close: "← Search another" }
+};
+function txt(key) {
+  if (lang === "both") return T.bn[key] + " / " + T.en[key];
+  return T[lang][key];
+}
+function dname(a) {
+  if (lang === "en") return a.en;
+  if (lang === "both") return a.name + " / " + a.en;
+  return a.name;
+}
+function setLang(l) {
+  lang = l;
+
+  document.getElementById("title").textContent = txt("title");
+  document.getElementById("tagline").textContent = txt("tagline");
+
+  searchBox.placeholder = txt("search");
+  show();
+}
+
+function line(o) {
+  return o.count === 0 ? "এখনো কেউ রেটিং দেয়নি"
+    : "রেটিং: " + o.rating.toFixed(1) + " / 5 (" + o.count + " জন)";
+}
+
+function detail(i) {
+  var a = areas[i];
+  var html = '<button class="ghost" style="margin-left:0" onclick="closeDetail()">' + txt("close") + '</button>' +
+    '<div class="card"><h2>' + dname(a) + '</h2>' +
+
+
+    '<div class="small">' + line(a) + '</div>' +
+
+
+    '<button onclick="rate(' + i + ',-1)">রেটিং দিন</button>';
+  if (a.thanas.length > 0) {
+    html += '<button class="ghost" onclick="toggle(' + i + ')">' +
+      (a.open ? "থানা লুকান" : "থানা দেখুন (" + a.thanas.length + ")") + '</button>';
+  }
+  if (a.open) {
+    for (var j = 0; j < a.thanas.length; j++) {
+      var th = a.thanas[j];
+      html += '<div class="thana"><strong>' + th.name + '</strong>' +
+        '<div class="small">' + line(th) + '</div>' +
+        '<button onclick="rate(' + i + ',' + j + ')">রেটিং দিন</button></div>';
+    }
+  }
+  return html + '</div>';
+}
+
+function show() {
+  var text = searchBox.value.trim().toLowerCase();
+  var html = "";
+
+  if (selected !== -1 && text === "")
+   {
+    html = detail(selected);
+  }
+   else if (text !== "") 
+   {
+    var found = "";
+
+    for (var i = 0; i < areas.length; i++) 
+    {
+      var a = areas[i];
+
+      if
+       (
+        a.name.toLowerCase().includes(text) ||
+        a.en.toLowerCase().includes(text)
+      ) 
+      {
+        found += '<div class="item" onclick="pick(' + i + ')">' +
+          dname(a) + ' (জেলা)</div>';
+      }
+
+      for (var j = 0; j < a.thanas.length; j++) {
+        var th = a.thanas[j];
+
+       var qs = enSkel(text);
+if (th.name.toLowerCase().includes(text) || (qs.length >= 2 && th.skel.includes(qs))) 
+ {
+          found += '<div class="item" onclick="pickThana(' +
+            i + ',' + j + ')">' +
+            th.name + '<br><small>জেলা: ' +
+            dname(a) + '</small></div>';
+        }
+      }
+    }
+
+
+
+    html = found === ""
+
+      ? "<p>" + txt("none") + "</p>"
+
+      : '<div class="sugg">' + found + '</div>';
+  }
+
+  listBox.innerHTML = html;
+}
+
+
+
+
+  
+function pickThana(i, j)
+ {
+  searchBox.value = "";
+
+  selected = i;
+  areas[i].open = true;
+
+  show();
+
+  setTimeout(function () 
+  {
+    var cards = listBox.querySelectorAll(".thana");
+    if (cards[j])
+    
+    {
+      cards[j].scrollIntoView(
+        
+      {
+        behavior: "smooth",
+        block: "center"
+      });
+    }
+  }, 100);
+}
+
+function pick(i) {
+  searchBox.value = "";
+  selected = i;
+  show();
+}
+
+function closeDetail() {
+  selected = -1;
+  show();
+  searchBox.focus();
+}
+
+function toggle(i) {
+  areas[i].open = !areas[i].open;
+  show();
+}
+
+
+
+function rate(i, j) {
+  var area = areas[i];
+  var target = j < 0 ? area : area.thanas[j];
+  var input = prompt(target.name + " এর জন্য ১ থেকে ৫ এর মধ্যে রেটিং দিন:");
+  if (input === null) return;
+  var n = Number(input);
+  if (!Number.isInteger(n) || n < 1 || n > 5) {
+    alert("১ থেকে ৫ এর মধ্যে একটা পূর্ণসংখ্যা দিন।");
+    return;
+  }
+  fetch("/api/rate", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ userId: userId, district: area.name, thana: j < 0 ? "" : target.name, score: n })
+  })
+    .then(function (r) { if (!r.ok) throw new Error(); return loadRatings(); })
+    .catch(function () { alert("রেটিং সেভ হয়নি, আবার চেষ্টা করুন।"); });
+}
+
+function loadRatings() {
+  return fetch("/api/ratings")
+    .then(function (r) { return r.json(); })
+    .then(function (rows) {
+      areas.forEach(function (a) {
+        a.rating = 0; a.count = 0;
+        a.thanas.forEach(function (t) { t.rating = 0; t.count = 0; });
+      });
+      rows.forEach(function (row) {
+        var a = areas.find(function (x) { return x.name === row.district; });
+        if (!a) return;
+       var target = row.thana === "" ? a
+          : a.thanas.find(function (t) { return t.name === row.thana; });
+        if (target) { target.rating = row.rating; target.count = row.count; }
+      });
+      show();
+    });
+}
+
+searchBox.addEventListener("input", function () { selected = -1; show(); });
+setLang("bn");
+loadRatings();
+</script>
+</body>
+</html>
