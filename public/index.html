@@ -39,6 +39,9 @@ input{width:100%;box-sizing:border-box;padding:16px;font-size:1.5rem;border:2px 
   <div id="rentBox" style="display:none;margin-top:16px;">
   <h2>ভাড়ার তথ্য দিন</h2>
   <p>আপনার এলাকার ভাড়া জানিয়ে অন্যদের সাহায্য করুন। নাম বা ঠিকানা লাগবে না।</p>
+
+<select id="thanaSelect" style="width:100%;padding:12px;font-size:1.2rem;margin-top:8px;"></select>
+  
   <select id="flatType" style="width:100%;padding:12px;font-size:1.2rem;margin-top:8px;">
     <option value="1K">1K</option>
     <option value="2K">2K</option>
@@ -497,6 +500,8 @@ function toggle(i) {
 }
 
 function showRent() {
+  if (selected === -1) return;
+  fillThanaSelect(selected);
   document.getElementById("rentBox").style.display = "block";
 }
 
@@ -528,23 +533,32 @@ function submitRent() {
   var area = currentArea();
   if (!area) return;
   fetch("/api/rent", {
+
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       userId: userId,
+
       district: area.district,
+
       thana: area.thana,
       flatType: document.getElementById("flatType").value,
+
+
       rent: amount
     })
   })
     .then(function (r) {
+
       if (!r.ok) throw new Error();
       alert("ধন্যবাদ, তথ্যটি জমা হয়েছে।");
+
+
       document.getElementById("rentAmount").value = "";
     })
     .catch(function () { alert("জমা হয়নি, আবার চেষ্টা করুন।"); });
 }
+
 
 function currentArea() {
   // ব্যবহারকারী যে জেলা/থানা খুলে রেখেছেন তা বের করা
@@ -557,6 +571,8 @@ function loadRatings() {
     .then(function (r) { return r.json(); })
     .then(function (rows) {
       areas.forEach(function (a) {
+
+
         a.rating = 0; a.count = 0;
         a.thanas.forEach(function (t) { t.rating = 0; t.count = 0; });
       });
@@ -573,6 +589,23 @@ function loadRatings() {
 
 searchBox.addEventListener("input", function () { selected = -1; show(); });
 setLang("bn");
+function fillThanaSelect(i) {
+  var sel = document.getElementById("thanaSelect");
+  sel.innerHTML = "";
+  var a = areas[i];
+
+  var opt = document.createElement("option");
+  opt.value = "";
+  opt.textContent = "জেলা সাধারণ (থানা নির্বাচন না করে)";
+  sel.appendChild(opt);
+  for (var j = 0; j < a.thanas.length; j++) {
+
+    var o = document.createElement("option");
+    o.value = a.thanas[j].name;
+    o.textContent = a.thanas[j].name;
+    sel.appendChild(o);
+  }
+}
 loadRatings();
 </script>
 </body>
