@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>নীড়</title>
 <style>
-
 body{font-family:sans-serif;font-size:20px;background:linear-gradient(180deg,#a9ddb8,#ceb47a);color:#1f2a1c;margin:0;padding:16px;min-height:100vh}
 .wrap{max-width:800px;margin:0 auto}
 h1{font-size:2.6rem;color:#fff;background:linear-gradient(90deg,#2f6f3e,#f59e0b);padding:16px 22px;border-radius:14px;margin-bottom:8px}
@@ -37,26 +36,24 @@ input{width:100%;box-sizing:border-box;padding:16px;font-size:1.5rem;border:2px 
   <input id="search" style="margin-top:12px" autocomplete="off">
   <div id="list"></div>
   <div id="rentBox" style="display:none;margin-top:16px;">
-  <h2>ভাড়ার তথ্য দিন</h2>
-  <p>আপনার এলাকার ভাড়া জানিয়ে অন্যদের সাহায্য করুন। নাম বা ঠিকানা লাগবে না।</p>
-
-<select id="thanaSelect" style="width:100%;padding:12px;font-size:1.2rem;margin-top:8px;"></select>
-  
-  <select id="flatType" style="width:100%;padding:12px;font-size:1.2rem;margin-top:8px;">
-    <option value="1K">1K</option>
-    <option value="2K">2K</option>
-    <option value="1LDK">1LDK</option>
-    <option value="2LDK">2LDK</option>
-    <option value="3K">3K</option>
-    <option value="3LDK">3LDK</option>
-  </select>
-  <input id="rentAmount" type="number" placeholder="মাসিক ভাড়া (টাকায়)" style="margin-top:8px;">
-  <button onclick="submitRent()">জমা দিন</button>
-</div>
+    <h2>ভাড়ার তথ্য দিন</h2>
+    <p>আপনার এলাকার ভাড়া জানিয়ে অন্যদের সাহায্য করুন। নাম বা ঠিকানা লাগবে না।</p>
+    <select id="thanaSelect" style="width:100%;padding:12px;font-size:1.2rem;margin-top:8px;"></select>
+    <select id="flatType" style="width:100%;padding:12px;font-size:1.2rem;margin-top:8px;">
+      <option value="1K">1K</option>
+      <option value="2K">2K</option>
+      <option value="1LDK">1LDK</option>
+      <option value="2LDK">2LDK</option>
+      <option value="3K">3K</option>
+      <option value="3LDK">3LDK</option>
+    </select>
+    <input id="rentAmount" type="number" placeholder="মাসিক ভাড়া (টাকায়)" style="margin-top:8px;">
+    <button onclick="submitRent()">জমা দিন</button>
+  </div>
 </div>
 
 <script>
-    function getUserId() {
+function getUserId() {
   try {
     var id = localStorage.getItem("neerUserId");
     if (!id) {
@@ -71,6 +68,7 @@ input{width:100%;box-sizing:border-box;padding:16px;font-size:1.5rem;border:2px 
   }
 }
 var userId = getUserId();
+
 var bnText =
 "ঢাকা,গাজীপুর,নারায়ণগঞ্জ,নরসিংদী,মানিকগঞ্জ,মুন্সীগঞ্জ,কিশোরগঞ্জ,টাঙ্গাইল,ফরিদপুর,গোপালগঞ্জ,মাদারীপুর,রাজবাড়ী,শরীয়তপুর," +
 "চট্টগ্রাম,কক্সবাজার,কুমিল্লা,ফেনী,ব্রাহ্মণবাড়িয়া,রাঙ্গামাটি,নোয়াখালী,চাঁদপুর,লক্ষ্মীপুর,খাগড়াছড়ি,বান্দরবান," +
@@ -171,136 +169,22 @@ function addMissingThanas(district, names) {
   if (!thanas[district]) {
     thanas[district] = [];
   }
-
-  const existing = new Set(thanas[district]);
-
-  thanas[district].push(
-    ...names.filter(name => !existing.has(name))
-  );
+  var existing = new Set(thanas[district]);
+  thanas[district].push.apply(thanas[district], names.filter(function (name) { return !existing.has(name); }));
 }
 
-// ঢাকা মহানগরীর বাদ পড়া পুলিশ থানা
 addMissingThanas("ঢাকা", [
-  "আদাবর",
-  "বাড্ডা",
-  "বনানী",
-  "বংশাল",
-  "ভাসানটেক",
-  "ক্যান্টনমেন্ট",
-  "চকবাজার",
-  "দক্ষিণখান",
-  "দারুস সালাম",
-  "ডেমরা",
-  "গেন্ডারিয়া",
-  "হাজারীবাগ",
-  "যাত্রাবাড়ী",
-  "কদমতলী",
-  "কাফরুল",
-  "কলাবাগান",
-  "কামরাঙ্গীরচর",
-  "খিলগাঁও",
-  "খিলক্ষেত",
-  "লালবাগ",
-  "মতিঝিল",
-  "মুগদা",
-  "নিউ মার্কেট",
-  "পল্লবী",
-  "পল্টন",
-  "রামনা",
-  "রামপুরা",
-  "রূপনগর",
-  "সবুজবাগ",
-  "শাহ আলী",
-  "শাহবাগ",
-  "শাহজাহানপুর",
-  "শেরেবাংলা নগর",
-  "শ্যামপুর",
-  "সূত্রাপুর",
-  "তেজগাঁও",
-  "তেজগাঁও শিল্পাঞ্চল",
-  "তুরাগ",
-  "উত্তরখান",
-  "উত্তরা পশ্চিম",
-  "ওয়ারী",
-  "বিমানবন্দর",
-  "দক্ষিণখান",
-  "মিরপুর মডেল",
-  "উত্তরা মডেল",
-  "কোতোয়ালী",
-  "গুলশান",
-  "ধানমন্ডি",
-  "মোহাম্মদপুর",
-  "পূর্ব উত্তরা"
+  "আদাবর","বাড্ডা","বনানী","বংশাল","ভাসানটেক","ক্যান্টনমেন্ট","চকবাজার","দক্ষিণখান","দারুস সালাম","ডেমরা","গেন্ডারিয়া","হাজারীবাগ","যাত্রাবাড়ী","কদমতলী","কাফরুল","কলাবাগান","কামরাঙ্গীরচর","খিলগাঁও","খিলক্ষেত","লালবাগ","মতিঝিল","মুগদা","নিউ মার্কেট","পল্লবী","পল্টন","রামনা","রামপুরা","রূপনগর","সবুজবাগ","শাহ আলী","শাহবাগ","শাহজাহানপুর","শেরেবাংলা নগর","শ্যামপুর","সূত্রাপুর","তেজগাঁও","তেজগাঁও শিল্পাঞ্চল","তুরাগ","উত্তরখান","উত্তরা পশ্চিম","ওয়ারী","বিমানবন্দর","মিরপুর মডেল","উত্তরা মডেল","কোতোয়ালী","গুলশান","ধানমন্ডি","মোহাম্মদপুর","পূর্ব উত্তরা"
 ]);
+addMissingThanas("ঢাকা", ["ধামরাই","দোহার","কেরানীগঞ্জ","নবাবগঞ্জ","সাভার"]);
+addMissingThanas("চট্টগ্রাম", ["আনোয়ারা","বাঁশখালী","বোয়ালখালী","চন্দনাইশ","ফটিকছড়ি","হাটহাজারী","লোহাগাড়া","মিরসরাই","পটিয়া","রাঙ্গুনিয়া","রাউজান","সন্দ্বীপ","সাতকানিয়া","সীতাকুণ্ড","কর্ণফুলী"]);
+addMissingThanas("চট্টগ্রাম", ["বাকলিয়া","চান্দগাঁও","সদরঘাট","ডবলমুরিং","পাহাড়তলী","হালিশহর","আকবরশাহ","পতেঙ্গা","ইপিজেড"]);
+addMissingThanas("কক্সবাজার", ["ঈদগাঁও"]);
+addMissingThanas("বগুড়া", ["সারিয়াকান্দি"]);
+addMissingThanas("ঠাকুরগাঁও", ["ভুল্লী","রুহিয়া"]);
+addMissingThanas("কুড়িগ্রাম", ["চর রাজিবপুর"]);
+addMissingThanas("সুনামগঞ্জ", ["শান্তিগঞ্জ"]);
 
-// ঢাকা জেলার উপজেলা
-addMissingThanas("ঢাকা", [
-  "ধামরাই",
-  "দোহার",
-  "কেরানীগঞ্জ",
-  "নবাবগঞ্জ",
-  "সাভার"
-]);
-
-// চট্টগ্রাম জেলার বাদ পড়া উপজেলা
-addMissingThanas("চট্টগ্রাম", [
-  "আনোয়ারা",
-  "বাঁশখালী",
-  "বোয়ালখালী",
-  "চন্দনাইশ",
-  "ফটিকছড়ি",
-  "হাটহাজারী",
-  "লোহাগাড়া",
-  "মিরসরাই",
-  "পটিয়া",
-  "রাঙ্গুনিয়া",
-  "রাউজান",
-  "সন্দ্বীপ",
-  "সাতকানিয়া",
-  "সীতাকুণ্ড",
-  "কর্ণফুলী"
-  
-]);
-
-// চট্টগ্রাম মহানগরীর বাদ পড়া পুলিশ থানা
-addMissingThanas("চট্টগ্রাম", [
-  "বাকলিয়া",
-  "চান্দগাঁও",
-  "সদরঘাট",
-
-  "ডবলমুরিং",
-  "পাহাড়তলী",
-  "হালিশহর",
-  "আকবরশাহ",
-  "পতেঙ্গা",
-  "ইপিজেড"
-]);
-
-// কক্সবাজার
-addMissingThanas("কক্সবাজার", [
-  "ঈদগাঁও"
-]);
-
-// বগুড়া
-addMissingThanas("বগুড়া", [
-  "সারিয়াকান্দি"
-]);
-
-// ঠাকুরগাঁও
-addMissingThanas("ঠাকুরগাঁও", [
-  "ভুল্লী",
-  "রুহিয়া"
-]);
-
-// কুড়িগ্রাম
-addMissingThanas("কুড়িগ্রাম", [
-  "চর রাজিবপুর"
-]);
-
-// সুনামগঞ্জ
-addMissingThanas("সুনামগঞ্জ", [
-  "শান্তিগঞ্জ"
-]);
 var bnMap = {
   "ক":"k","খ":"kh","গ":"g","ঘ":"gh","ঙ":"ng","চ":"ch","ছ":"ch","জ":"j","ঝ":"jh","ঞ":"n",
   "ট":"t","ঠ":"th","ড":"d","ঢ":"dh","ণ":"n","ত":"t","থ":"th","দ":"d","ধ":"dh","ন":"n",
@@ -312,9 +196,8 @@ function collapse(s) {
   return s.replace(/(.)\1+/g, "$1");
 }
 
-// বাংলা নাম -> ব্যঞ্জনের ছাঁচ (যেমন "ধানমন্ডি" -> "dhnmnd")
 function bnSkel(s) {
-  s = s.normalize("NFC").replace(/ড়/g, "ড়").replace(/ঢ়/g, "ঢ়").replace(/য়/g, "য়");
+  s = s.normalize("NFC");
   var out = "";
   for (var i = 0; i < s.length; i++) {
     if (bnMap[s[i]]) out += bnMap[s[i]];
@@ -322,7 +205,6 @@ function bnSkel(s) {
   return collapse(out);
 }
 
-// ইংরেজি লেখা -> একই ধরনের ছাঁচ (যেমন "dhanmondi" -> "dhnmnd")
 function enSkel(s) {
   s = s.toLowerCase()
     .replace(/ph/g, "f").replace(/z/g, "j").replace(/v/g, "b")
@@ -344,13 +226,15 @@ var selected = -1;
 var lang = "bn";
 var listBox = document.getElementById("list");
 var searchBox = document.getElementById("search");
+var rentBox = document.getElementById("rentBox");
 
 var T = {
-  bn: { title: "নীড়", tagline: "বাসা নেওয়ার আগে জেনে নিন জেলাটা কেমন।",search: "জেলা বা থানার নাম লিখুন...",
-none: "কোনো জেলা বা থানা পাওয়া যায়নি।", close: "← অন্য জেলা খুঁজুন" },
+  bn: { title: "নীড়", tagline: "বাসা নেওয়ার আগে জেনে নিন জেলাটা কেমন।", search: "জেলা বা থানার নাম লিখুন...",
+        none: "কোনো জেলা বা থানা পাওয়া যায়নি।", close: "← অন্য জেলা খুঁজুন" },
   en: { title: "Neer", tagline: "Know the district before you rent a home.", search: "Search district or thana...",
-none: "No district or thana found.", close: "← Search another" }
+        none: "No district or thana found.", close: "← Search another" }
 };
+
 function txt(key) {
   if (lang === "both") return T.bn[key] + " / " + T.en[key];
   return T[lang][key];
@@ -362,10 +246,8 @@ function dname(a) {
 }
 function setLang(l) {
   lang = l;
-
   document.getElementById("title").textContent = txt("title");
   document.getElementById("tagline").textContent = txt("tagline");
-
   searchBox.placeholder = txt("search");
   show();
 }
@@ -401,80 +283,38 @@ function show() {
   var text = searchBox.value.trim().toLowerCase();
   var html = "";
 
-  if (selected !== -1 && text === "")
-   {
+  if (selected !== -1 && text === "") {
     html = detail(selected);
-  }
-   else if (text !== "") 
-   {
+  } else if (text !== "") {
     var found = "";
-
-    for (var i = 0; i < areas.length; i++) 
-    {
+    var qs = enSkel(text);
+    for (var i = 0; i < areas.length; i++) {
       var a = areas[i];
-
-      if
-       (
-        a.name.toLowerCase().includes(text) ||
-        a.en.toLowerCase().includes(text)
-      ) 
-      {
-        found += '<div class="item" onclick="pick(' + i + ')">' +
-          dname(a) + ' (জেলা)</div>';
+      if (a.name.toLowerCase().includes(text) || a.en.toLowerCase().includes(text)) {
+        found += '<div class="item" onclick="pick(' + i + ')">' + dname(a) + ' (জেলা)</div>';
       }
-
       for (var j = 0; j < a.thanas.length; j++) {
         var th = a.thanas[j];
-
-       var qs = enSkel(text);
-if (th.name.toLowerCase().includes(text) || (qs.length >= 2 && th.skel.includes(qs))) 
- {
-          found += '<div class="item" onclick="pickThana(' +
-            i + ',' + j + ')">' +
-            th.name + '<br><small>জেলা: ' +
-            dname(a) + '</small></div>';
+        if (th.name.toLowerCase().includes(text) || (qs.length >= 2 && th.skel.includes(qs))) {
+          found += '<div class="item" onclick="pickThana(' + i + ',' + j + ')">' +
+            th.name + '<br><small>জেলা: ' + dname(a) + '</small></div>';
         }
       }
     }
-
-
-
-    html = found === ""
-
-      ? "<p>" + txt("none") + "</p>"
-
-      : '<div class="sugg">' + found + '</div>';
+    html = found === "" ? "<p>" + txt("none") + "</p>" : '<div class="sugg">' + found + '</div>';
   }
 
   listBox.innerHTML = html;
 }
 
-
-
-
-  
-function pickThana(i, j)
- {
+function pickThana(i, j) {
   searchBox.value = "";
-
   selected = i;
   areas[i].open = true;
-
   show();
-
-  setTimeout(function () 
-  {
+  setTimeout(function () {
     var cards = listBox.querySelectorAll(".thana");
-    if (cards[j])
-    
-    {
-      cards[j].scrollIntoView(
-        
-      {
-        behavior: "smooth",
-        block: "center"
-      });
-    }
+    if (cards[j]) cards[j].scrollIntoView({ behavior: "smooth", block: "center" });
   }, 100);
 }
 
@@ -486,13 +326,10 @@ function pick(i) {
 
 function closeDetail() {
   selected = -1;
+  rentBox.style.display = "none";
   show();
   searchBox.focus();
 }
-
-
-
-
 
 function toggle(i) {
   areas[i].open = !areas[i].open;
@@ -502,15 +339,31 @@ function toggle(i) {
 function showRent() {
   if (selected === -1) return;
   fillThanaSelect(selected);
-  document.getElementById("rentBox").style.display = "block";
+  rentBox.style.display = "block";
 }
 
+function fillThanaSelect(i) {
+  var sel = document.getElementById("thanaSelect");
+  sel.innerHTML = "";
+  var a = areas[i];
+  var opt = document.createElement("option");
+  opt.value = "";
+  opt.textContent = "জেলা সাধারণ (থানা নির্বাচন না করে)";
+  sel.appendChild(opt);
+  for (var j = 0; j < a.thanas.length; j++) {
+    var o = document.createElement("option");
+    o.value = a.thanas[j].name;
+    o.textContent = a.thanas[j].name;
+    sel.appendChild(o);
+  }
+}
 
 function rate(i, j) {
   var area = areas[i];
   var target = j < 0 ? area : area.thanas[j];
   var input = prompt(target.name + " এর জন্য ১ থেকে ৫ এর মধ্যে রেটিং দিন:");
   if (input === null) return;
+  
   var n = Number(input);
   if (!Number.isInteger(n) || n < 1 || n > 5) {
     alert("১ থেকে ৫ এর মধ্যে একটা পূর্ণসংখ্যা দিন।");
@@ -524,6 +377,13 @@ function rate(i, j) {
     .then(function (r) { if (!r.ok) throw new Error(); return loadRatings(); })
     .catch(function () { alert("রেটিং সেভ হয়নি, আবার চেষ্টা করুন।"); });
 }
+
+function currentArea() {
+  if (selected === -1) { alert("আগে একটা জেলা খুলুন।"); return null; }
+  var a = areas[selected];
+  return { district: a.name, thana: document.getElementById("thanaSelect").value };
+}
+
 function submitRent() {
   var amount = Number(document.getElementById("rentAmount").value);
   if (!Number.isInteger(amount) || amount < 1000 || amount > 500000) {
@@ -533,53 +393,39 @@ function submitRent() {
   var area = currentArea();
   if (!area) return;
   fetch("/api/rent", {
-
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       userId: userId,
-
       district: area.district,
-
       thana: area.thana,
+
       flatType: document.getElementById("flatType").value,
-
-
       rent: amount
     })
   })
     .then(function (r) {
-
       if (!r.ok) throw new Error();
       alert("ধন্যবাদ, তথ্যটি জমা হয়েছে।");
-
-
       document.getElementById("rentAmount").value = "";
     })
     .catch(function () { alert("জমা হয়নি, আবার চেষ্টা করুন।"); });
 }
 
-
-function currentArea() {
-  // ব্যবহারকারী যে জেলা/থানা খুলে রেখেছেন তা বের করা
-  if (selected === -1) { alert("আগে একটা জেলা খুলুন।"); return null; }
-  var a = areas[selected];
-  return { district: a.name, thana: "" };
-}
 function loadRatings() {
   return fetch("/api/ratings")
     .then(function (r) { return r.json(); })
     .then(function (rows) {
       areas.forEach(function (a) {
-
-
         a.rating = 0; a.count = 0;
         a.thanas.forEach(function (t) { t.rating = 0; t.count = 0; });
       });
       rows.forEach(function (row) {
+
+
         var a = areas.find(function (x) { return x.name === row.district; });
         if (!a) return;
-       var target = row.thana === "" ? a
+        var target = row.thana === "" ? a
           : a.thanas.find(function (t) { return t.name === row.thana; });
         if (target) { target.rating = row.rating; target.count = row.count; }
       });
@@ -587,25 +433,8 @@ function loadRatings() {
     });
 }
 
-searchBox.addEventListener("input", function () { selected = -1; show(); });
+searchBox.addEventListener("input", function () { selected = -1; rentBox.style.display = "none"; show(); });
 setLang("bn");
-function fillThanaSelect(i) {
-  var sel = document.getElementById("thanaSelect");
-  sel.innerHTML = "";
-  var a = areas[i];
-
-  var opt = document.createElement("option");
-  opt.value = "";
-  opt.textContent = "জেলা সাধারণ (থানা নির্বাচন না করে)";
-  sel.appendChild(opt);
-  for (var j = 0; j < a.thanas.length; j++) {
-
-    var o = document.createElement("option");
-    o.value = a.thanas[j].name;
-    o.textContent = a.thanas[j].name;
-    sel.appendChild(o);
-  }
-}
 loadRatings();
 </script>
 </body>
