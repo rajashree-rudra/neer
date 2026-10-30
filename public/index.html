@@ -36,6 +36,20 @@ input{width:100%;box-sizing:border-box;padding:16px;font-size:1.5rem;border:2px 
   </div>
   <input id="search" style="margin-top:12px" autocomplete="off">
   <div id="list"></div>
+  <div id="rentBox" style="display:none;margin-top:16px;">
+  <h2>ভাড়ার তথ্য দিন</h2>
+  <p>আপনার এলাকার ভাড়া জানিয়ে অন্যদের সাহায্য করুন। নাম বা ঠিকানা লাগবে না।</p>
+  <select id="flatType" style="width:100%;padding:12px;font-size:1.2rem;margin-top:8px;">
+    <option value="1K">1K</option>
+    <option value="2K">2K</option>
+    <option value="1LDK">1LDK</option>
+    <option value="2LDK">2LDK</option>
+    <option value="3K">3K</option>
+    <option value="3LDK">3LDK</option>
+  </select>
+  <input id="rentAmount" type="number" placeholder="মাসিক ভাড়া (টাকায়)" style="margin-top:8px;">
+  <button onclick="submitRent()">জমা দিন</button>
+</div>
 </div>
 
 <script>
@@ -362,11 +376,7 @@ function detail(i) {
   var a = areas[i];
   var html = '<button class="ghost" style="margin-left:0" onclick="closeDetail()">' + txt("close") + '</button>' +
     '<div class="card"><h2>' + dname(a) + '</h2>' +
-
-
     '<div class="small">' + line(a) + '</div>' +
-
-
     '<button onclick="rate(' + i + ',-1)">রেটিং দিন</button>';
   if (a.thanas.length > 0) {
     html += '<button class="ghost" onclick="toggle(' + i + ')">' +
@@ -380,6 +390,7 @@ function detail(i) {
         '<button onclick="rate(' + i + ',' + j + ')">রেটিং দিন</button></div>';
     }
   }
+  html += '<button class="ghost" onclick="showRent()">ভাড়ার তথ্য দিন</button>';
   return html + '</div>';
 }
 
@@ -476,11 +487,18 @@ function closeDetail() {
   searchBox.focus();
 }
 
+
+
+
+
 function toggle(i) {
   areas[i].open = !areas[i].open;
   show();
 }
 
+function showRent() {
+  document.getElementById("rentBox").style.display = "block";
+}
 
 
 function rate(i, j) {
@@ -501,7 +519,39 @@ function rate(i, j) {
     .then(function (r) { if (!r.ok) throw new Error(); return loadRatings(); })
     .catch(function () { alert("রেটিং সেভ হয়নি, আবার চেষ্টা করুন।"); });
 }
+function submitRent() {
+  var amount = Number(document.getElementById("rentAmount").value);
+  if (!Number.isInteger(amount) || amount < 1000 || amount > 500000) {
+    alert("ভাড়া ১,০০০ থেকে ৫,০০,০০০ টাকার মধ্যে দিন।");
+    return;
+  }
+  var area = currentArea();
+  if (!area) return;
+  fetch("/api/rent", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      userId: userId,
+      district: area.district,
+      thana: area.thana,
+      flatType: document.getElementById("flatType").value,
+      rent: amount
+    })
+  })
+    .then(function (r) {
+      if (!r.ok) throw new Error();
+      alert("ধন্যবাদ, তথ্যটি জমা হয়েছে।");
+      document.getElementById("rentAmount").value = "";
+    })
+    .catch(function () { alert("জমা হয়নি, আবার চেষ্টা করুন।"); });
+}
 
+function currentArea() {
+  // ব্যবহারকারী যে জেলা/থানা খুলে রেখেছেন তা বের করা
+  if (selected === -1) { alert("আগে একটা জেলা খুলুন।"); return null; }
+  var a = areas[selected];
+  return { district: a.name, thana: "" };
+}
 function loadRatings() {
   return fetch("/api/ratings")
     .then(function (r) { return r.json(); })
