@@ -74,7 +74,7 @@ app.post("/api/rate", async (req, res) => {
   }
 });
 
-// ভাড়ার তথ্য জমা (ফর্ম পরে যোগ হবে)
+// ভাড়ার তথ্য জমা
 const FLAT_TYPES = ["1K", "2K", "1LDK", "2LDK", "3K", "3LDK"];
 app.post("/api/rent", async (req, res) => {
   const { userId, district, thana, flatType, rent } = req.body;
@@ -90,6 +90,26 @@ app.post("/api/rent", async (req, res) => {
       VALUES ($1, $2, $3, $4, $5)
     `, [userId, district, thana || "", flatType, rent]);
     res.json({ ok: true });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "সার্ভার সমস্যা" });
+  }
+});
+
+// ভাড়ার পরিসর (মধ্যমা, সর্বনিম্ন, সর্বোচ্চ); অন্তত ৩টি তথ্য থাকলেই দেখানো হবে
+app.get("/api/rents", async (req, res) => {
+  try {
+    const { rows } = await pool.query(`
+      SELECT district, thana, flat_type,
+             COUNT(*)::int AS count,
+             PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY rent)::int AS median,
+             MIN(rent)::int AS min,
+             MAX(rent)::int AS max
+      FROM rents
+      GROUP BY district, thana, flat_type
+      HAVING COUNT(*) >= 3
+    `);
+    res.json(rows);
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "সার্ভার সমস্যা" });
