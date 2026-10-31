@@ -262,6 +262,7 @@ function detail(i) {
   var html = '<button class="ghost" style="margin-left:0" onclick="closeDetail()">' + txt("close") + '</button>' +
     '<div class="card"><h2>' + dname(a) + '</h2>' +
     '<div class="small">' + line(a) + '</div>' +
+    rentHtml(a.name, "") +
     '<button onclick="rate(' + i + ',-1)">রেটিং দিন</button>';
   if (a.thanas.length > 0) {
     html += '<button class="ghost" onclick="toggle(' + i + ')">' +
@@ -272,13 +273,13 @@ function detail(i) {
       var th = a.thanas[j];
       html += '<div class="thana"><strong>' + th.name + '</strong>' +
         '<div class="small">' + line(th) + '</div>' +
+        rentHtml(a.name, th.name) +
         '<button onclick="rate(' + i + ',' + j + ')">রেটিং দিন</button></div>';
     }
   }
   html += '<button class="ghost" onclick="showRent()">ভাড়ার তথ্য দিন</button>';
   return html + '</div>';
 }
-
 function show() {
   var text = searchBox.value.trim().toLowerCase();
   var html = "";
@@ -363,7 +364,7 @@ function rate(i, j) {
   var target = j < 0 ? area : area.thanas[j];
   var input = prompt(target.name + " এর জন্য ১ থেকে ৫ এর মধ্যে রেটিং দিন:");
   if (input === null) return;
-  
+
   var n = Number(input);
   if (!Number.isInteger(n) || n < 1 || n > 5) {
     alert("১ থেকে ৫ এর মধ্যে একটা পূর্ণসংখ্যা দিন।");
@@ -433,9 +434,38 @@ function loadRatings() {
     });
 }
 
+
+
+var rentStats = [];
+
+function loadRents() {
+  return fetch("/api/rents")
+    .then(function (r) { return r.json(); })
+    .then(function (rows) {
+      rentStats = rows;
+      show();
+    })
+    .catch(function () {});
+}
+
+function rentHtml(district, thana) {
+  var rows = rentStats.filter(function (r) {
+    return r.district === district && (r.thana || "") === (thana || "");
+  });
+  if (rows.length === 0) {
+    return '<div class="small">ভাড়া: পর্যাপ্ত তথ্য নেই (কমপক্ষে ৩টি লাগে)</div>';
+  }
+  return rows.map(function (r) {
+    return '<div class="small">' + r.flat_type + ': মধ্যমা ' + r.median +
+      ' টাকা (সর্বনিম্ন ' + r.min + ', সর্বোচ্চ ' + r.max + ', ' + r.count + ' টি তথ্য)</div>';
+  }).join("");
+}
+
+
 searchBox.addEventListener("input", function () { selected = -1; rentBox.style.display = "none"; show(); });
 setLang("bn");
 loadRatings();
+loadRents();
 </script>
 </body>
 </html>
